@@ -5,6 +5,9 @@ on:
     branches:
       - main # Ensures the action runs on pushes to the main branch
 
+env:
+  SPHINX_VERSION: "7.1.2"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,7 +23,7 @@ jobs:
       - name: Install Sphinx and dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sphinx==${{ env.SPHINX_VERSION }}
+          pip install sphinx=${{ env.SPHINX_VERSION }}
           pip install -r docs/requirements.txt  # Adjust path if necessary
 
       - name: Build HTML with Sphinx
