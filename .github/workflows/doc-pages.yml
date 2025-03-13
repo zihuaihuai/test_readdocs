@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  SPHINX_VERSION: 4.5.0
+  SPHINX_VERSION: 7.1.2
 
 jobs:
   doc:
@@ -26,22 +26,22 @@ jobs:
       - name: Setup Sphinx
         run: |
           pip install sphinx==${{ env.SPHINX_VERSION }}
-          pip install -r doc/requirements.txt
+          pip install -r docs/requirements.txt
 
       - name: Build HTML
         run: |
-          cd doc
+          cd docs
           make html
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: html-doc
-          path: doc/build/html/
+          path: docs/build/html/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.7
         if: github.ref == 'refs/heads/master'
         with:
           branch: gh-pages
-          folder: doc/build/html
+          folder: docs/build/html
