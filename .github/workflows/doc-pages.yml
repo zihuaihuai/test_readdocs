@@ -54,6 +54,6 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.7
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages # Target branch to deploy to
+          branch: main # Target branch to deploy to
           folder: docs/build/html/ # The folder path to deploy
           clean: true # Optional: Cleans the deployment branch except for the .git directory
