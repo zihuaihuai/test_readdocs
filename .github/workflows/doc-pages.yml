@@ -43,5 +43,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.7
         if: github.ref == 'refs/heads/main'
         with:
-          branch: gh-pages
+          branch: main
           folder: docs/build/html
