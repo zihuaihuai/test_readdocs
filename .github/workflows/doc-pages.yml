@@ -1,48 +1,56 @@
-name: Publish doc to GitHub Pages
+name: Publish Documentation to GitHub Pages
 
-on: push
-
-# Cancels running instances when a pull request is updated by a commit
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.run_id }}
-  cancel-in-progress: true
-
-env:
-  SPHINX_VERSION: 7.1.2
+on:
+  push:
+    branches:
+      - main # Ensures the action runs on pushes to the main branch
 
 jobs:
-  doc:
-    name: Publish doc to GitHub Pages
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Sphinx
-        run: |
-          pip install sphinx==${{ env.SPHINX_VERSION }}
-          pip install -r docs/requirements.txt
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x" # Ensure compatibility with your project requirements
 
-      - name: Build HTML
+      - name: Install Sphinx and dependencies
         run: |
-          cd docs
+          python -m pip install --upgrade pip
+          pip install sphinx==${{ env.SPHINX_VERSION }}
+          pip install -r docs/requirements.txt  # Adjust path if necessary
+
+      - name: Build HTML with Sphinx
+        run: |
+          cd docs  # Adjust path to where your Sphinx Makefile is located
           make html
 
-      - name: Upload artifacts
+      - name: Upload HTML to artifact (optional)
         uses: actions/upload-artifact@v4
         with:
-          name: html-doc
+          name: sphinx-docs
+          path: docs/build/html/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: sphinx-docs
           path: docs/build/html/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.7
-        if: github.ref == 'refs/heads/main'
         with:
-          branch: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
-          folder: docs/build/html
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages # Target branch to deploy to
+          folder: docs/build/html/ # The folder path to deploy
+          clean: true # Optional: Cleans the deployment branch except for the .git directory
