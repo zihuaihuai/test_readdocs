@@ -6,7 +6,8 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   pages: write
   id-token: write
 
@@ -41,7 +42,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.7
-        if: github.ref == 'refs/heads/main'
         with:
-          branch: gh-pages
-          folder: docs/build/html
+          branch: gh-pages # <--- The branch to deploy to
+          folder: docs/build/html # <--- Where your built docs live
+          token: ${{ secrets.GITHUB_TOKEN }} # <--- Make sure to pass the GITHUB_TOKEN
