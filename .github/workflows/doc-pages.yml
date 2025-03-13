@@ -1,59 +1,65 @@
-name: Publish Documentation to GitHub Pages
+name: Deploy Sphinx Docs via GitHub Actions
 
 on:
+  # Rebuild docs on every push to 'main' or on pull requests
   push:
-    branches:
-      - main # Ensures the action runs on pushes to the main branch
+    branches: ["main"]
+  pull_request:
 
-env:
-  SPHINX_VERSION: "7.1.2"
+permissions:
+  # Required so we can upload and deploy Pages artifacts
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
+  # 1) Build the docs
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Check out repository
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.x" # Ensure compatibility with your project requirements
+          python-version: "3.x"
 
-      - name: Install Sphinx and dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sphinx==${{ env.SPHINX_VERSION }}
-          pip install -r docs/requirements.txt  # Adjust path if necessary
+          pip install sphinx==7.1.2
+          pip install -r docs/requirements.txt   # Adjust if needed
 
-      - name: Build HTML with Sphinx
+      - name: Build Sphinx HTML
         run: |
-          cd docs  # Adjust path to where your Sphinx Makefile is located
+          cd docs
           make html
 
-      - name: Upload HTML to artifact (optional)
-        uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          name: sphinx-docs
-          path: docs/build/html/
+          # Upload the built HTML so the next job can deploy it
+          path: docs/build/html
 
+  # 2) Deploy to GitHub Pages
   deploy:
-    needs: build
+    # Marks this job as the one that deploys to your "GitHub Pages" environment
+    environment:
+      name: github-pages
+      # The 'url' field is automatically set by the deploy action,
+      # but you can reference steps.deployment.outputs.page_url if needed
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: sphinx-docs
-          path: docs/build/html/
+    needs: build # This job depends on the 'build' job finishing first
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-pages-artifact@v1
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.7
+        id: deployment
+        uses: actions/deploy-pages@v1
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages # Target branch to deploy to
-          folder: docs/build/html/ # The folder path to deploy
-          clean: true # Optional: Cleans the deployment branch except for the .git directory
+          # Deploy *everything* from the downloaded artifact to your Pages site
+          path: .
