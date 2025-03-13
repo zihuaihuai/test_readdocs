@@ -35,7 +35,7 @@ jobs:
           make html  # Adjust if your Makefile is elsewhere
 
       - name: Upload artifact for Pages
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           path: docs/build/html
 
@@ -47,7 +47,7 @@ jobs:
       name: github-pages
     steps:
       - name: Download artifact
-        uses: actions/download-pages-artifact@v1
+        uses: actions/download-artifact@v4
 
       - name: Deploy to GitHub Pages
         id: deployment
