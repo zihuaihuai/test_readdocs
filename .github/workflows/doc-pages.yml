@@ -44,4 +44,5 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           branch: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
           folder: docs/build/html
